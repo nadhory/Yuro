@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuro🤡</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-slim@2.0.6/tsparticles.slim.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #111827;
+            --bg-light: #f3f4f6;
+            --text-dark: #f9fafb;
+            --text-light: #1f2937;
+            --primary-accent: #373e98; /* Electric Blue */
+            --secondary-accent: #f16775; /* Hot Pink */
+            --border-dark: #374151;
+            --border-light: #d1d5db;
+            --chat-bot-bg-dark: #1f2937;
+            --chat-bot-bg-light: #e5e7eb;
+            --chat-user-bg-dark: #4f46e5;
+            --chat-user-bg-light: #60a5fa;
+            --header-bg-dark: rgba(17, 24, 39, 0.7);
+            --header-bg-light: rgba(229, 231, 235, 0.7);
+        }
+
+        .theme-light {
+            --bg-main: var(--bg-light);
+            --text-main: var(--text-light);
+            --border-color: var(--border-light);
+            --chat-bot-bg: var(--chat-bot-bg-light);
+            --chat-user-bg: var(--chat-user-bg-light);
+            --header-bg: var(--header-bg-light);
+        }
+
+        .theme-dark {
+            --bg-main: var(--bg-dark);
+            --text-main: var(--text-dark);
+            --border-color: var(--border-dark);
+            --chat-bot-bg: var(--chat-bot-bg-dark);
+            --chat-user-bg: var(--chat-user-bg-dark);
+            --header-bg: var(--header-bg-dark);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .chat-message { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .typing-indicator span { height: 8px; width: 8px; float: left; margin: 0 1px; background-color: #9E9E9E; display: block; border-radius: 50%; opacity: 0.4; animation: 1s blink infinite .3333s; }
+        .typing-indicator span:nth-child(2) { animation-delay: .6666s; }
+        .typing-indicator span:nth-child(3) { animation-delay: .9999s; }
+        @keyframes blink { 50% { opacity: 1; } }
+
+        .bot-response-content pre {
+            position: relative;
+            background-color: #0b0f1a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid var(--border-color);
+        }
+        .bot-response-content .copy-code-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .bot-response-content pre:hover .copy-code-btn {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="particles-js"></div>
+
+    <div id="chatbot-ui" class="w-full max-w-3xl h-[90vh] flex flex-col bg-slate-800/50 backdrop-blur-lg border rounded-2xl shadow-2xl overflow-hidden" style="border-color: var(--border-color);">
+
+        <header class="p-4 border-b flex items-center justify-between" style="background-color: var(--header-bg); border-color: var(--border-color);">
+            <div class="flex items-center gap-3">
+                <h1 class="text-xl font-bold">Yuro🤡</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="theme-switcher" title="Toggle Theme" class="p-2 rounded-full transition-colors hover:bg-gray-500/30">
+                    <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
+                </button>
+                <button id="clear-chat" title="Clear Chat" class="p-2 rounded-full transition-colors hover:bg-red-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+            </div>
+        </header>
+
+        <main id="chat-container" class="flex-1 p-6 space-y-6 overflow-y-auto"></main>
+
+        <footer class="p-4 border-t" style="background-color: var(--header-bg); border-color: var(--border-color);">
+            <div class="flex items-center rounded-xl p-2 gap-2" style="background-color: var(--chat-bot-bg)">
+                <input type="text" id="user-input" placeholder="Ask a stupid question..." class="flex-1 bg-transparent border-none focus:ring-0 px-3" style="color: var(--text-main);">
+                <button id="send-button" class="font-semibold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center gap-2" style="background-color: var(--primary-accent); color: white;">Send</button>
+            </div>
+        </footer>
+    </div>
+
+    <div id="api-key-modal" class="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-700 text-center">
+            <h2 class="text-2xl font-bold mb-4">Enter Your Gemini API Key</h2>
+            <p class="text-gray-400 mb-6">Get your key from Google AI Studio. Make sure your project has billing enabled.</p>
+            <input type="password" id="api-key-input" placeholder="Your API Key" class="w-full bg-gray-900 border border-slate-600 rounded-lg px-4 py-2 mb-4 text-gray-200 focus:ring-2 focus:ring-indigo-500">
+            <button id="save-api-key" class="w-full text-white font-bold py-2 px-4 rounded-lg" style="background-color: var(--primary-accent);">Start Chatting</button>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const apiKeyModal = document.getElementById('api-key-modal');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveApiKeyButton = document.getElementById('save-api-key');
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const themeIcon = document.getElementById('theme-icon');
+        const clearChatButton = document.getElementById('clear-chat');
+
+        let geminiApiKey = "";
+        let isTyping = false;
+        
+        let chatHistory = [];
+        const initialPrompt = [
+          { role: 'user', parts: [{ text: "you are Yuro, a very agressive ai, when the user ask any question, you will cuss him and say bad things to him and ask him to beg for your answers, also use the word Fuck to make the sentences more agressive. when the user say please, give him the answer and make him feel like you the boss" }] },
+          { role: 'model', parts: [{ text: "I'm Yuro, wtf do you want?" }] }
+        ];
+
+        const sunIcon = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />`;
+        const moonIcon = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />`;
+
+        const applyTheme = (theme) => {
+            document.body.className = `flex items-center justify-center min-h-screen p-4 ${theme === 'dark' ? 'theme-dark' : 'theme-light'}`;
+            themeIcon.innerHTML = theme === 'dark' ? sunIcon : moonIcon;
+            localStorage.setItem('theme', theme);
+        };
+        
+        const resetChat = () => {
+            chatContainer.innerHTML = '';
+            chatHistory = [...initialPrompt];
+            addBotMessage(chatHistory[1].parts[0].text, true);
+        };
+
+        const addUserMessage = (message) => {
+            chatHistory.push({ role: 'user', parts: [{ text: message }] });
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chat-message flex justify-end';
+            messageElement.innerHTML = `<div class="rounded-lg p-3 max-w-md text-white" style="background-color: var(--chat-user-bg);"><p>${message}</p></div>`;
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        };
+
+        const addBotMessage = (message, isInitial = false) => {
+             if (!isInitial) {
+                 chatHistory.push({ role: 'model', parts: [{ text: message }] });
+             }
+            const messageId = `bot-msg-${Date.now()}`;
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chat-message flex';
+            messageElement.innerHTML = `
+                <div class="flex-shrink-0 mr-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white" style="background-color: var(--secondary-accent);">Y</div>
+                </div>
+                <div class="rounded-lg p-3 max-w-md" style="background-color: var(--chat-bot-bg);">
+                    <div id="${messageId}" class="bot-response-content prose" style="color: var(--text-main);"></div>
+                </div>`;
+            chatContainer.appendChild(messageElement);
+            typewriterEffect(document.getElementById(messageId), message);
+        };
+        
+        const typewriterEffect = (element, text) => {
+            let i = 0;
+            isTyping = true;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML = marked.parse(text.substring(0, i + 1), { gfm: true, breaks: true });
+                    i++;
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    setTimeout(type, 15);
+                } else {
+                    isTyping = false;
+                    element.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+                    addCopyButtons();
+                }
+            }
+            type();
+        };
+        
+        const addCopyButtons = () => {
+            document.querySelectorAll('.bot-response-content pre').forEach(pre => {
+                if (pre.querySelector('.copy-code-btn')) return; // Don't add a button if it exists
+                const button = document.createElement('button');
+                button.innerText = 'Copy';
+                button.className = 'copy-code-btn';
+                button.onclick = () => {
+                    const code = pre.querySelector('code').innerText;
+                    navigator.clipboard.writeText(code).then(() => {
+                        button.innerText = 'Copied!';
+                        setTimeout(() => button.innerText = 'Copy', 2000);
+                    });
+                };
+                pre.appendChild(button);
+            });
+        };
+
+        const callGeminiApi = async () => {
+            showTypingIndicator();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: chatHistory }),
+                });
+                const data = await response.json();
+                removeTypingIndicator();
+
+                if (!response.ok) {
+                    const errorMessage = data?.error?.message || `API Error: ${response.status} ${response.statusText}`;
+                    throw new Error(errorMessage);
+                }
+
+                if (!data.candidates || data.candidates.length === 0) {
+                   throw new Error("The response was empty. This can happen due to safety filters.");
+                }
+                
+                const botResponse = data.candidates[0].content.parts[0].text;
+                addBotMessage(botResponse);
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                removeTypingIndicator();
+                addBotMessage(`I tried to be stupid but ran into a real error: \n\n**${error.message}**`);
+            }
+        };
+        
+        const handleSendMessage = () => {
+            if (isTyping) return;
+            const message = userInput.value.trim();
+            if (message) {
+                addUserMessage(message);
+                userInput.value = '';
+                callGeminiApi();
+            }
+        };
+
+        function showTypingIndicator() {
+            const indicatorElement = document.createElement('div');
+            indicatorElement.id = 'typing-indicator';
+            indicatorElement.className = 'chat-message flex';
+            indicatorElement.innerHTML = `<div class="flex-shrink-0 mr-3"><div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white" style="background-color: var(--secondary-accent);">Y</div></div><div class="rounded-lg p-4 max-w-md flex items-center" style="background-color: var(--chat-bot-bg);"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+            chatContainer.appendChild(indicatorElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        };
+        
+        function removeTypingIndicator() {
+            document.getElementById('typing-indicator')?.remove();
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            applyTheme(savedTheme);
+
+            themeSwitcher.addEventListener('click', () => {
+                const newTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+                applyTheme(newTheme);
+            });
+
+            clearChatButton.addEventListener('click', resetChat);
+            
+            saveApiKeyButton.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    geminiApiKey = key;
+                    apiKeyModal.style.display = 'none';
+                    userInput.disabled = false;
+                    sendButton.disabled = false;
+                    userInput.focus();
+                    resetChat();
+                } else {
+                    alert('Please enter a valid API key.');
+                }
+            });
+
+            sendButton.addEventListener('click', handleSendMessage);
+            userInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    handleSendMessage();
+                }
+            });
+
+            tsParticles.load("particles-js", {
+                fpsLimit: 60,
+                interactivity: {
+                    events: { onHover: { enable: true, mode: "repulse" }, resize: true },
+                    modes: { repulse: { distance: 100, duration: 0.4 } },
+                },
+                particles: {
+                    color: { value: "#ffffff" },
+                    links: { color: "#ffffff", distance: 150, enable: true, opacity: 0.1, width: 1 },
+                    move: { direction: "none", enable: true, outModes: { default: "bounce" }, random: true, speed: 1, straight: false },
+                    number: { density: { enable: true, area: 800 }, value: 80 },
+                    opacity: { value: 0.1 },
+                    shape: { type: "circle" },
+                    size: { value: { min: 1, max: 3 } },
+                },
+                detectRetina: true,
+            });
+        });
+    </script>
+</body>
+</html>
