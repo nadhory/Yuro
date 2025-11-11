@@ -229,9 +229,6 @@
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const menuToggleButton = document.getElementById('menu-toggle-button');
 		const reviewCodeButton = document.getElementById('review-code-button');
-		
-		let codeModal, codeModalContent, codeModalOverlay, codeModalClose;
-		let cachedCodeText = null;
 
         let geminiApiKey = "";
         let chatHistory = [];
@@ -591,7 +588,7 @@
             menuToggleButton.addEventListener('click', toggleSidebar);
             sidebarOverlay.addEventListener('click', toggleSidebar);
 			reviewCodeButton.addEventListener('click', () => {
-				openCodePreviewModal();
+				window.open('https://github.com/nadhory/Yuro', '_blank', 'noopener');
 			});
 
             personaSelector.addEventListener('click', (e) => {
@@ -611,91 +608,7 @@
             });
         });
 
-		function ensureCodeModal() {
-			if (codeModal) return;
-			
-			codeModalOverlay = document.createElement('div');
-			codeModalOverlay.className = 'fixed inset-0 bg-black/70 z-50 opacity-0 pointer-events-none transition-opacity duration-200';
-			document.body.appendChild(codeModalOverlay);
-			
-			codeModal = document.createElement('div');
-			codeModal.className = 'fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 p-4';
-			
-			const wrapper = document.createElement('div');
-			wrapper.className = 'glass-effect rounded-2xl border border-[var(--border-color)] max-w-3xl w-full shadow-2xl overflow-hidden';
-			
-			const header = document.createElement('div');
-			header.className = 'flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]';
-			header.innerHTML = '<h3 class="font-semibold">Code Preview</h3>';
-			
-			codeModalClose = document.createElement('button');
-			codeModalClose.className = 'p-2 rounded-md hover:bg-white/10';
-			codeModalClose.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
-			header.appendChild(codeModalClose);
-			
-			const body = document.createElement('div');
-			body.className = 'max-h-[70vh] overflow-auto';
-			
-			codeModalContent = document.createElement('pre');
-			codeModalContent.className = 'm-0 p-4 bg-[var(--bg-primary)] text-sm';
-			const codeEl = document.createElement('code');
-			codeEl.className = 'language-javascript';
-			codeModalContent.appendChild(codeEl);
-			
-			body.appendChild(codeModalContent);
-			wrapper.appendChild(header);
-			wrapper.appendChild(body);
-			codeModal.appendChild(wrapper);
-			document.body.appendChild(codeModal);
-
-			const closeModal = () => {
-				codeModal.classList.add('opacity-0', 'pointer-events-none');
-				codeModalOverlay.classList.add('opacity-0', 'pointer-events-none');
-			};
-			codeModalClose.addEventListener('click', closeModal);
-			codeModalOverlay.addEventListener('click', closeModal);
-			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
-		}
-
-		async function openCodePreviewModal() {
-			ensureCodeModal();
-			codeModal.classList.remove('opacity-0', 'pointer-events-none');
-			codeModalOverlay.classList.remove('opacity-0', 'pointer-events-none');
-
-			const codeEl = codeModalContent.querySelector('code');
-			if (typeof cachedCodeText === 'string') {
-				try {
-					const result = hljs.highlightAuto(cachedCodeText);
-					codeEl.className = `hljs language-${result.language || 'plaintext'}`;
-					codeEl.innerHTML = result.value || cachedCodeText;
-				} catch {
-					codeEl.textContent = cachedCodeText;
-				}
-				return;
-			}
-
-			try {
-				const res = await fetch('code.txt', { cache: 'no-store' });
-				if (!res.ok) throw new Error(`HTTP ${res.status}`);
-				cachedCodeText = await res.text();
-				try {
-					const result = hljs.highlightAuto(cachedCodeText);
-					codeEl.className = `hljs language-${result.language || 'plaintext'}`;
-					codeEl.innerHTML = result.value || cachedCodeText;
-				} catch {
-					codeEl.textContent = cachedCodeText;
-				}
-			} catch (e) {
-				codeEl.textContent = `// Could not load bundled code.txt\n// ${e?.message || 'Unknown error'}\n// Browsers block local file reads over file://. Please run a tiny local server (e.g., \"python -m http.server\") and open http://localhost:8000/`;
-			}
-		}
-
-		document.addEventListener('DOMContentLoaded', async () => {
-			try {
-				const res = await fetch('code.txt', { cache: 'no-store' });
-				if (res.ok) cachedCodeText = await res.text();
-			} catch {}
-		}, { once: true });
+		
     </script>
 </body>
 </html>
