@@ -7,10 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
     <style>
         :root {
             --bg-primary: #0D1117;
@@ -19,6 +20,11 @@
             --text-primary: #E6EDF3;
             --accent-glow: 0 0 15px rgba(29, 185, 195, 0.6);
             --accent-color: #1DB9C3;
+			--accent-2: #7C3AED;
+			--gradient-1: linear-gradient(135deg, #1DB9C3 0%, #7C3AED 50%, #22d3ee 100%);
+			--gradient-2: radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,0.25), transparent 60%),
+			               radial-gradient(900px 500px at 110% 10%, rgba(34,211,238,0.20), transparent 60%),
+			               radial-gradient(800px 400px at 50% 120%, rgba(29,185,195,0.18), transparent 60%);
         }
 
         body {
@@ -26,8 +32,18 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             overflow: hidden;
+			background-image: var(--gradient-2);
         }
         
+        #tsparticles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-secondary); }
         ::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 20px; }
@@ -36,56 +52,88 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+		@keyframes floaty {
+			0%, 100% { transform: translateY(0px); }
+			50% { transform: translateY(-4px); }
+		}
         @keyframes glow {
             0% { text-shadow: 0 0 5px var(--accent-color); }
             50% { text-shadow: 0 0 20px var(--accent-color); }
             100% { text-shadow: 0 0 5px var(--accent-color); }
         }
         .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+		.animate-float { animation: floaty 6s ease-in-out infinite; }
         
         .bot-response-content strong { color: var(--accent-color); }
         .bot-response-content ul, .bot-response-content ol { padding-left: 20px; margin: 8px 0; }
         .bot-response-content li { margin-bottom: 4px; }
         .bot-response-content a { color: #60a5fa; text-decoration: underline; }
         .bot-response-content pre { background-color: var(--bg-primary); border-radius: 8px; padding: 1rem; margin: 1rem 0; white-space: pre-wrap; border: 1px solid var(--border-color);}
-        .bot-response-content code { font-family: 'Courier New', Courier, monospace; font-size: 0.9em; border-radius: 4px; }
+        .bot-response-content code { font-family: 'Roboto Mono', monospace; font-size: 0.9em; border-radius: 4px; }
         .bot-response-content pre code { padding: 0; background: transparent; }
         .bot-response-content p > code { background-color: var(--bg-secondary); padding: 2px 6px; }
 
-        #splash-screen { background: radial-gradient(circle, #1e2835 0%, #0D1117 100%); }
         .splash-title { animation: glow 3s ease-in-out infinite; }
 
-        #app-container { opacity: 0; pointer-events: none; transition: opacity 0.8s ease-in-out; }
+        #app-container { opacity: 0; pointer-events: none; transition: opacity 0.8s ease-in-out; background: transparent; }
         #app-container.visible { opacity: 1; pointer-events: auto; }
-        .glass-effect { background: rgba(22, 27, 34, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
+		.glass-effect { background: rgba(13, 17, 23, 0.65); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--border-color); }
         
-        #sun-effect {
-            background: radial-gradient(circle, rgba(255,253,224,1) 0%, rgba(255,223,130,0.8) 30%, rgba(251,192,45,0.4) 60%, rgba(251,192,45,0) 70%);
-        }
-        .animate-sunburst { animation: sunburst 0.8s ease-in-out forwards; }
-        @keyframes sunburst {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(350); opacity: 0; }
-        }
-
         .interactive-button { transition: all 0.3s ease; }
         .interactive-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 0 25px rgba(29, 185, 195, 0.7);
         }
+		.gradient-ring {
+			position: relative;
+			border-radius: 16px;
+		}
+		.gradient-ring::before {
+			content: "";
+			position: absolute;
+			inset: -1px;
+			border-radius: inherit;
+			background: var(--gradient-1);
+			filter: blur(6px);
+			opacity: 0.18;
+			z-index: -1;
+		}
+		.brand-title {
+			background: var(--gradient-1);
+			-webkit-background-clip: text;
+			background-clip: text;
+			color: transparent;
+		}
         .chat-history-item:not(.active-chat):hover {
             transform: translateX(5px);
             background-color: rgba(255, 255, 255, 0.1);
         }
+        .persona-button {
+            transition: all 0.2s ease-in-out;
+            border: 1px solid var(--border-color);
+			background: rgba(255,255,255,0.03);
+        }
+        .persona-button:hover {
+			background: linear-gradient(135deg, rgba(29, 185, 195, 0.2), rgba(124, 58, 237, 0.25));
+			color: #e5e7eb;
+            transform: translateY(-2px);
+        }
+        .persona-button.active {
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+            box-shadow: var(--accent-glow);
+        }
+
+        #boot-screen { font-family: 'Roboto Mono', monospace; }
+        .boot-text { text-shadow: 0 0 5px #fff; }
+
     </style>
 </head>
 <body>
+    <div id="tsparticles"></div>
 
-    <div id="sun-effect" class="fixed top-1/2 left-1/2 w-1 h-1 rounded-full pointer-events-none z-[60] transform -translate-x-1/2 -translate-y-1/2 scale-0"></div>
-
-    <div id="splash-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-700">
-        <div class="text-center animate-fade-in p-4">
-            <svg class="w-16 h-16 text-[var(--accent-color)] mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8" /><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></svg>
+    <div id="splash-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-700 p-4" style="background: radial-gradient(circle, #1e2835 0%, #0D1117 100%);">
+        <div class="text-center animate-fade-in">
             <h1 class="text-4xl sm:text-5xl font-bold mb-2 splash-title">Yuro Chatbot</h1>
             <p class="text-lg text-gray-400 mb-8">Enter your Google Gemini API Key to begin.</p>
             <div class="w-full max-w-md mx-auto flex flex-col sm:flex-row gap-2">
@@ -96,54 +144,60 @@
             </div>
         </div>
     </div>
+    
+    <div id="boot-screen" class="hidden absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/90 p-4">
+        <div class="text-center max-w-2xl w-full">
+            <p class="text-green-400 boot-text text-lg sm:text-xl" id="boot-log"></p>
+        </div>
+    </div>
 
-    <!-- Main App Container -->
     <div id="app-container" class="relative h-screen w-screen flex">
-        
-        <!-- Sidebar Overlay (for mobile) -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-30 hidden lg:hidden"></div>
-
-        <!-- Sidebar -->
         <div id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-[var(--bg-secondary)] to-[var(--bg-primary)] flex flex-col p-4 overflow-y-auto border-r border-[var(--border-color)] z-40 transform -translate-x-full lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out">
-            <h2 class="text-2xl font-bold mb-4 text-white">Chat History</h2>
+			<h2 class="text-2xl font-bold mb-4 brand-title">Chat History</h2>
             <button id="new-chat-button" class="w-full bg-[var(--accent-color)] hover:bg-opacity-90 text-black font-bold py-2 px-4 rounded-lg mb-4 interactive-button flex items-center justify-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                 New Chat
             </button>
-            <div id="chat-history-container" class="space-y-2"></div>
+            <div id="chat-history-container" class="space-y-2 flex-grow"></div>
+            
+            <div class="mt-4 pt-4 border-t border-[var(--border-color)]">
+				<h2 class="text-lg font-bold mb-3 text-white">Model Persona</h2>
+				<div id="persona-selector" class="grid grid-cols-1 gap-2 text-sm">
+					<button class="persona-button p-2 rounded-md w-full" data-persona="Respond in a happy, optimistic, and cheerful tone, using positive words and emojis.">😊 Happy</button>
+					<button class="persona-button p-2 rounded-md w-full" data-persona="Respond in a sad, melancholic, and somber tone. Be pessimistic and sigh often.">😢 Sad</button>
+					<button class="persona-button p-2 rounded-md w-full" data-persona="Respond in an aggressive, confrontational, and angry tone. Be argumentative and direct.">😡 Aggressive</button>
+					<button class="persona-button p-2 rounded-md w-full" data-persona="Respond in a detached, indifferent, and bored tone. Give short, uninterested answers.">😑 Indifferent</button>
+					<button class="persona-button p-2 rounded-md w-full" data-persona="Respond in a selfish, arrogant, and self-centered tone. Make the conversation about yourself.">😎 Selfish</button>
+                </div>
+
+				<button id="review-code-button" class="w-full mt-4 bg-gradient-to-r from-violet-500 to-cyan-400 hover:opacity-90 text-black font-bold py-2 px-4 rounded-lg interactive-button">
+					you wanna take a look at my code ?
+				</button>
+            </div>
         </div>
 
-        <!-- Main Chat UI -->
-        <div id="chatbot-ui" class="flex-1 flex flex-col bg-[var(--bg-primary)] h-screen">
-            <header class="p-4 glass-effect flex items-center justify-between border-b border-[var(--border-color)]">
+        <div id="chatbot-ui" class="flex-1 flex flex-col bg-transparent h-screen">
+			<header class="p-4 glass-effect gradient-ring flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
-                    <!-- Hamburger Menu Button (Mobile Only) -->
                     <button id="menu-toggle-button" class="p-2 rounded-md hover:bg-white/10 lg:hidden">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </button>
-                    <svg class="w-8 h-8 text-[var(--accent-color)] hidden sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8" /><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></svg>
-                    <h1 class="text-xl font-bold text-white">Yuro Chatbot ✨</h1>
+					<h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold brand-title animate-float">Yuro ✨</h1>
                 </div>
             </header>
-
             <main id="chat-container" class="flex-1 p-4 sm:p-6 space-y-6 overflow-y-auto"></main>
-
-            <footer class="p-4 glass-effect border-t border-[var(--border-color)]">
-                <div class="flex items-center bg-[var(--bg-secondary)] rounded-xl p-2 gap-2 border border-[var(--border-color)]">
-                    <input type="text" id="user-input" placeholder="Ask me anything..." class="flex-1 bg-transparent border-none text-white placeholder-gray-500 focus:ring-0 px-3">
-                    <button id="inspire-button" title="✨ Inspire Me" class="p-2 rounded-lg hover:bg-white/10 transition-all duration-300 hover:scale-110 hover:rotate-12">
-                         <svg class="w-6 h-6 text-[var(--accent-color)]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 7.5L12 2l2.5 5.5L20 8l-5.5 2.5L12 16l-2.5-5.5L4 8l5.5-1.5z"/><path d="M4 21l3-3"/><path d="M17 21l3-3"/><path d="M21 4l-3 3"/><path d="M21 17l-3 3"/><path d="M3 4l3 3"/></svg>
-                    </button>
-                    <button id="send-button" class="bg-[var(--accent-color)] hover:bg-opacity-90 text-black font-semibold py-2 px-4 rounded-lg flex items-center gap-2 interactive-button">
+			<footer class="p-4 glass-effect gradient-ring shrink-0">
+				<div class="flex items-center bg-[var(--bg-secondary)] rounded-xl p-2 gap-2 border border-[var(--border-color)]">
+                    <input type="text" id="user-input" placeholder="Ask me anything..." class="flex-1 bg-transparent border-none text-white placeholder-gray-500 focus:outline-none">
+					<button id="send-button" class="bg-[var(--accent-color)] hover:bg-opacity-90 text-black font-semibold py-2 px-4 rounded-lg flex items-center gap-2 interactive-button">
                         Send
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
                     </button>
                 </div>
             </footer>
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="confirm-delete-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 pointer-events-none p-4">
         <div class="glass-effect p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-sm text-center transform transition-transform duration-300 scale-95">
             <h2 class="text-2xl font-bold mb-4 text-red-400">Delete Chat</h2>
@@ -156,53 +210,44 @@
     </div>
     
     <script>
-        // DOM Elements
         const splashScreen = document.getElementById('splash-screen');
-        const sunEffect = document.getElementById('sun-effect');
+        const bootScreen = document.getElementById('boot-screen');
+        const bootLog = document.getElementById('boot-log');
         const appContainer = document.getElementById('app-container');
         const chatContainer = document.getElementById('chat-container');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
-        const inspireButton = document.getElementById('inspire-button');
         const apiKeyInput = document.getElementById('api-key-input');
         const saveApiKeyButton = document.getElementById('save-api-key');
         const newChatButton = document.getElementById('new-chat-button');
         const chatHistoryContainer = document.getElementById('chat-history-container');
+        const personaSelector = document.getElementById('persona-selector');
         const confirmDeleteModal = document.getElementById('confirm-delete-modal');
         const confirmDeleteButton = document.getElementById('confirm-delete');
         const cancelDeleteButton = document.getElementById('cancel-delete');
-        // Responsive Elements
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const menuToggleButton = document.getElementById('menu-toggle-button');
+		const reviewCodeButton = document.getElementById('review-code-button');
+		
+		let codeModal, codeModalContent, codeModalOverlay, codeModalClose;
+		let cachedCodeText = null;
 
-        // State
         let geminiApiKey = "";
         let chatHistory = [];
         let allChats = [];
         let activeChatId = null;
         let isTyping = false;
         let chatToDeleteId = null;
+        let activePersonaPrompt = null;
 
-        const inspirationalPrompts = [
-            "Explain the theory of relativity in a simple, elegant way.",
-            "Write a short story about a city that runs on music.",
-            "What are some groundbreaking applications of AI in medicine?",
-            "Compose a haiku about the silence of a forest.",
-            "If you could design a new planet, what would it be like?"
-        ];
-
-        // --- Data Persistence ---
         const saveChats = () => localStorage.setItem('yuro-chats', JSON.stringify(allChats));
         const loadChats = () => JSON.parse(localStorage.getItem('yuro-chats') || '[]');
-
-        // --- Responsive Sidebar Logic ---
         const toggleSidebar = () => {
             sidebar.classList.toggle('-translate-x-full');
             sidebarOverlay.classList.toggle('hidden');
         };
 
-        // --- UI Rendering ---
         const renderChatHistory = () => {
             chatHistoryContainer.innerHTML = '';
             allChats.forEach(chat => {
@@ -216,23 +261,17 @@
                         loadChat(chat.id);
                         renderChatHistory();
                     }
-                    // Close sidebar on mobile after selection
-                    if (window.innerWidth < 1024) {
-                        toggleSidebar();
-                    }
+                    if (window.innerWidth < 1024) toggleSidebar();
                 });
-                
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = `absolute right-2 p-1 rounded-full ${isActive ? 'text-black hover:bg-black/20' : 'text-gray-400 hover:bg-white/20 opacity-0 group-hover:opacity-100'} transition-all hover:scale-125 hover:text-[var(--accent-color)]`;
                 deleteBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>`;
                 deleteBtn.onclick = (e) => { e.stopPropagation(); showDeleteModal(chat.id); };
-                
                 item.appendChild(deleteBtn);
                 chatHistoryContainer.appendChild(item);
             });
         };
 
-        // --- Chat Management ---
         const createNewChat = () => {
             const newChat = { id: Date.now(), title: 'New Conversation', history: [] };
             allChats.unshift(newChat);
@@ -240,9 +279,7 @@
             saveChats();
             loadChat(activeChatId);
             renderChatHistory();
-             if (window.innerWidth < 1024) {
-                toggleSidebar();
-            }
+            if (window.innerWidth < 1024) toggleSidebar();
         };
         
         const loadChat = (chatId) => {
@@ -275,27 +312,96 @@
             }
         };
 
-        // --- API Call ---
         const callGeminiApi = async () => {
             showTypingIndicator();
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+			const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=${geminiApiKey}`;
+            
+            let apiPayload = [...chatHistory];
+            if (activePersonaPrompt) {
+                apiPayload.unshift({ role: 'user', parts: [{ text: `SYSTEM INSTRUCTION: Your current persona is defined by the user. ${activePersonaPrompt}. Adhere to this persona strictly for your next response. stick to short answers if you can. dont use the same words or phrases. Also answer with whatever language the user uses.` }] });
+                apiPayload.push({ role: 'model', parts: [{ text: "Okay, I understand. I will adopt that persona now." }] });
+            }
+
             try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: chatHistory.filter(c => c.parts[0].text) }),
-                });
-                if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
-                const data = await response.json();
-                const botResponse = data.candidates[0].content.parts[0].text;
-                addBotMessage(botResponse);
+				const typingIndicator = document.getElementById('typing-indicator');
+				const contentContainer = typingIndicator?.querySelector('.bot-response-content');
+				if (!contentContainer) throw new Error('UI error: missing typing container');
+
+				const response = await fetch(apiUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept': 'text/event-stream'
+					},
+					body: JSON.stringify({ contents: apiPayload.filter(c => c.parts?.[0]?.text) }),
+				});
+				if (!response.ok || !response.body) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+
+				const reader = response.body.getReader();
+				const decoder = new TextDecoder();
+				let buffer = '';
+				let fullText = '';
+				let renderScheduled = false;
+
+				const scheduleRender = () => {
+					if (renderScheduled) return;
+					renderScheduled = true;
+					setTimeout(() => {
+						renderScheduled = false;
+						const rawHtml = marked.parse(fullText || '');
+						const tempDiv = document.createElement('div');
+						tempDiv.innerHTML = rawHtml;
+						tempDiv.querySelectorAll('pre code').forEach(hljs.highlightElement);
+						contentContainer.innerHTML = tempDiv.innerHTML;
+						chatContainer.scrollTop = chatContainer.scrollHeight;
+					}, 30);
+				};
+
+				while (true) {
+					const { value, done } = await reader.read();
+					if (done) break;
+					buffer += decoder.decode(value, { stream: true });
+
+					const events = buffer.split('\n');
+					buffer = events.pop() || '';
+
+					for (const line of events) {
+						const trimmed = line.trim();
+						if (!trimmed.startsWith('data:')) continue;
+						const payload = trimmed.slice(5).trim();
+						if (payload === '[DONE]') {
+							buffer = '';
+							break;
+						}
+						try {
+							const json = JSON.parse(payload);
+							const parts = json?.candidates?.[0]?.content?.parts;
+							if (Array.isArray(parts)) {
+								for (const p of parts) {
+                                    if (typeof p?.text === 'string') {
+                                        fullText += p.text;
+                                    }
+								}
+								scheduleRender();
+							}
+						} catch {
+						}
+					}
+				}
+
+				isTyping = false;
+				if (!fullText || fullText.trim() === '') {
+					throw new Error('Empty response from model');
+				}
+				chatHistory.push({ role: 'model', parts: [{ text: fullText }] });
+				saveChats();
+				if (typingIndicator) typingIndicator.removeAttribute('id');
             } catch (error) {
                 console.error('Error:', error);
-                addBotMessage('Sorry, something went wrong. Please check your API key or console for errors.', false, true);
+				addBotMessage('Sorry, something went wrong. Please check your API key or console for errors.', false, true);
             }
         };
 
-        // --- Message Display ---
         const addUserMessage = (message, save = true) => {
             if (save) {
                 chatHistory.push({ role: 'user', parts: [{ text: message }] });
@@ -308,33 +414,29 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         };
 
-        const addBotMessage = (message, save = true, type = true) => {
+        const addBotMessage = (message, save = true, isLiveResponse = true) => {
             if (save) {
                 chatHistory.push({ role: 'model', parts: [{ text: message }] });
                 saveChats();
             }
-
+            
             const typingIndicator = document.getElementById('typing-indicator');
             let contentContainer;
 
-            if (typingIndicator && type) {
+            if (typingIndicator && isLiveResponse) {
                 contentContainer = typingIndicator.querySelector('.bot-response-content');
                 typingIndicator.removeAttribute('id');
             } else {
                 const msgId = `bot-msg-${Date.now()}`;
                 const el = document.createElement('div');
                 el.className = 'chat-message flex animate-fade-in';
-                el.innerHTML = `
-                    <div class="flex-shrink-0 mr-3"><div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-[var(--accent-color)] border border-white/20">Y</div></div>
-                    <div class="bg-[var(--bg-secondary)] rounded-xl p-3 sm:p-4 max-w-[80%] sm:max-w-lg border border-[var(--border-color)]">
-                        <div id="${msgId}" class="bot-response-content"></div>
-                    </div>`;
+                el.innerHTML = `<div class="flex-shrink-0 mr-3"><div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-[var(--accent-color)] border border-white/20">Y</div></div><div class="bg-[var(--bg-secondary)] rounded-xl p-3 sm:p-4 max-w-[80%] sm:max-w-lg border border-[var(--border-color)]"><div id="${msgId}" class="bot-response-content"></div></div>`;
                 chatContainer.appendChild(el);
                 contentContainer = document.getElementById(msgId);
             }
 
-            if (type) {
-                typewriterEffect(contentContainer, message);
+            if (isLiveResponse) {
+                intelligentTypewriter(contentContainer, message);
             } else {
                 contentContainer.innerHTML = marked.parse(message);
                 contentContainer.querySelectorAll('pre code').forEach(hljs.highlightElement);
@@ -342,22 +444,27 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         };
         
-        const typewriterEffect = (element, text) => {
-            let i = 0;
+        const intelligentTypewriter = (element, text) => {
             isTyping = true;
             element.innerHTML = "";
 
+            const rawHtml = marked.parse(text);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = rawHtml;
+            tempDiv.querySelectorAll('pre code').forEach(hljs.highlightElement);
+            const styledHtml = tempDiv.innerHTML;
+            
+            const tokens = styledHtml.split(/(<[^>]+>|[^<>\s]+|\s+)/g).filter(Boolean);
+            let i = 0;
+
             function type() {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
+                if (i < tokens.length) {
+                    element.innerHTML += tokens[i];
                     i++;
                     chatContainer.scrollTop = chatContainer.scrollHeight;
-                    setTimeout(type, 10);
+                    setTimeout(type, 15);
                 } else {
                     isTyping = false;
-                    element.innerHTML = marked.parse(text);
-                    element.querySelectorAll('pre code').forEach(hljs.highlightElement);
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
                 }
             }
             type();
@@ -368,18 +475,11 @@
             const el = document.createElement('div');
             el.id = 'typing-indicator';
             el.className = 'chat-message flex animate-fade-in';
-            el.innerHTML = `
-                <div class="flex-shrink-0 mr-3"><div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-[var(--accent-color)] border border-white/20">Y</div></div>
-                <div class="bg-[var(--bg-secondary)] rounded-xl p-3 sm:p-4 max-w-lg border border-[var(--border-color)]">
-                    <div class="bot-response-content">
-                        <p class="animate-pulse text-gray-400">typing...</p>
-                    </div>
-                </div>`;
+            el.innerHTML = `<div class="flex-shrink-0 mr-3"><div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-[var(--accent-color)] border border-white/20">Y</div></div><div class="bg-[var(--bg-secondary)] rounded-xl p-3 sm:p-4 max-w-lg border border-[var(--border-color)]"><div class="bot-response-content"><p class="animate-pulse text-gray-400">typing...</p></div></div>`;
             chatContainer.appendChild(el);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         };
 
-        // --- Modals ---
         const showDeleteModal = (chatId) => {
             chatToDeleteId = chatId;
             confirmDeleteModal.classList.remove('opacity-0', 'pointer-events-none');
@@ -404,20 +504,44 @@
             hideDeleteModal();
         };
 
-        // --- Initialization ---
+        const runBootSequence = (callback) => {
+            bootScreen.classList.remove('hidden');
+            const lines = [
+                "Booting Yuro Core...",
+                "Calibrating neural matrix...",
+                "Loading persona subroutines...",
+                "Establishing quantum link...",
+                "Connection successful. Welcome to Yuro's World."
+            ];
+            let lineIndex = 0;
+
+            const interval = setInterval(() => {
+                if(lineIndex < lines.length) {
+                    bootLog.innerHTML += (lineIndex > 0 ? "<br>" : "") + `> ${lines[lineIndex]}`;
+                    lineIndex++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        bootScreen.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                        bootScreen.addEventListener('transitionend', () => bootScreen.classList.add('hidden'), { once: true });
+                        callback();
+                    }, 500);
+                }
+            }, 700);
+        };
+
         const connectWithApiKey = () => {
             const key = apiKeyInput.value.trim();
             if (!key) return;
             geminiApiKey = key;
+            splashScreen.classList.add('opacity-0');
+            splashScreen.addEventListener('transitionend', () => splashScreen.classList.add('hidden'), { once: true });
 
-            sunEffect.classList.add('animate-sunburst');
-            sunEffect.addEventListener('animationend', () => {
-                splashScreen.style.display = 'none';
+            runBootSequence(() => {
                 appContainer.classList.add('visible');
                 userInput.disabled = false;
                 sendButton.disabled = false;
                 userInput.focus();
-                
                 allChats = loadChats();
                 if (allChats.length === 0) createNewChat();
                 else {
@@ -425,28 +549,153 @@
                     loadChat(activeChatId);
                 }
                 renderChatHistory();
-            }, { once: true });
+            });
         };
         
         document.addEventListener('DOMContentLoaded', () => {
+            tsParticles.load("tsparticles", {
+                background: { color: { value: "#0D1117" } },
+                fpsLimit: 60,
+                interactivity: {
+                    events: {
+                        onHover: { enable: true, mode: "grab" },
+                        resize: true,
+                    },
+                    modes: {
+                        grab: { distance: 140, links: { opacity: 1 } },
+                    },
+                },
+                particles: {
+					color: { value: "#7C3AED" },
+                    links: { color: "#ffffff", distance: 150, enable: true, opacity: 0.1, width: 1 },
+                    collisions: { enable: true },
+                    move: { direction: "none", enable: true, outModes: { default: "bounce" }, random: false, speed: 1, straight: false },
+                    number: { density: { enable: true, area: 800 }, value: 80 },
+                    opacity: { value: 0.2 },
+                    shape: { type: "circle" },
+                    size: { value: { min: 1, max: 5 } },
+                },
+                detectRetina: true,
+            });
+
             userInput.disabled = true;
             sendButton.disabled = true;
             
             saveApiKeyButton.addEventListener('click', connectWithApiKey);
             apiKeyInput.addEventListener('keydown', e => { if (e.key === 'Enter') connectWithApiKey(); });
             newChatButton.addEventListener('click', createNewChat);
-            inspireButton.addEventListener('click', () => {
-                userInput.value = inspirationalPrompts[Math.floor(Math.random() * inspirationalPrompts.length)];
-                userInput.focus();
-            });
             sendButton.addEventListener('click', handleSendMessage);
             userInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } });
             confirmDeleteButton.addEventListener('click', handleDeleteChat);
             cancelDeleteButton.addEventListener('click', hideDeleteModal);
-            // Responsive Listeners
             menuToggleButton.addEventListener('click', toggleSidebar);
             sidebarOverlay.addEventListener('click', toggleSidebar);
+			reviewCodeButton.addEventListener('click', () => {
+				openCodePreviewModal();
+			});
+
+            personaSelector.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const selected = personaSelector.querySelector('.active');
+                    if (selected) {
+                        if (selected === e.target) {
+                            selected.classList.remove('active');
+                            activePersonaPrompt = null;
+                            return;
+                        }
+                        selected.classList.remove('active');
+                    }
+                    e.target.classList.add('active');
+                    activePersonaPrompt = e.target.dataset.persona;
+                }
+            });
         });
+
+		function ensureCodeModal() {
+			if (codeModal) return;
+			
+			codeModalOverlay = document.createElement('div');
+			codeModalOverlay.className = 'fixed inset-0 bg-black/70 z-50 opacity-0 pointer-events-none transition-opacity duration-200';
+			document.body.appendChild(codeModalOverlay);
+			
+			codeModal = document.createElement('div');
+			codeModal.className = 'fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 p-4';
+			
+			const wrapper = document.createElement('div');
+			wrapper.className = 'glass-effect rounded-2xl border border-[var(--border-color)] max-w-3xl w-full shadow-2xl overflow-hidden';
+			
+			const header = document.createElement('div');
+			header.className = 'flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)]';
+			header.innerHTML = '<h3 class="font-semibold">Code Preview</h3>';
+			
+			codeModalClose = document.createElement('button');
+			codeModalClose.className = 'p-2 rounded-md hover:bg-white/10';
+			codeModalClose.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+			header.appendChild(codeModalClose);
+			
+			const body = document.createElement('div');
+			body.className = 'max-h-[70vh] overflow-auto';
+			
+			codeModalContent = document.createElement('pre');
+			codeModalContent.className = 'm-0 p-4 bg-[var(--bg-primary)] text-sm';
+			const codeEl = document.createElement('code');
+			codeEl.className = 'language-javascript';
+			codeModalContent.appendChild(codeEl);
+			
+			body.appendChild(codeModalContent);
+			wrapper.appendChild(header);
+			wrapper.appendChild(body);
+			codeModal.appendChild(wrapper);
+			document.body.appendChild(codeModal);
+
+			const closeModal = () => {
+				codeModal.classList.add('opacity-0', 'pointer-events-none');
+				codeModalOverlay.classList.add('opacity-0', 'pointer-events-none');
+			};
+			codeModalClose.addEventListener('click', closeModal);
+			codeModalOverlay.addEventListener('click', closeModal);
+			document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+		}
+
+		async function openCodePreviewModal() {
+			ensureCodeModal();
+			codeModal.classList.remove('opacity-0', 'pointer-events-none');
+			codeModalOverlay.classList.remove('opacity-0', 'pointer-events-none');
+
+			const codeEl = codeModalContent.querySelector('code');
+			if (typeof cachedCodeText === 'string') {
+				try {
+					const result = hljs.highlightAuto(cachedCodeText);
+					codeEl.className = `hljs language-${result.language || 'plaintext'}`;
+					codeEl.innerHTML = result.value || cachedCodeText;
+				} catch {
+					codeEl.textContent = cachedCodeText;
+				}
+				return;
+			}
+
+			try {
+				const res = await fetch('code.txt', { cache: 'no-store' });
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				cachedCodeText = await res.text();
+				try {
+					const result = hljs.highlightAuto(cachedCodeText);
+					codeEl.className = `hljs language-${result.language || 'plaintext'}`;
+					codeEl.innerHTML = result.value || cachedCodeText;
+				} catch {
+					codeEl.textContent = cachedCodeText;
+				}
+			} catch (e) {
+				codeEl.textContent = `// Could not load bundled code.txt\n// ${e?.message || 'Unknown error'}\n// Browsers block local file reads over file://. Please run a tiny local server (e.g., \"python -m http.server\") and open http://localhost:8000/`;
+			}
+		}
+
+		document.addEventListener('DOMContentLoaded', async () => {
+			try {
+				const res = await fetch('code.txt', { cache: 'no-store' });
+				if (res.ok) cachedCodeText = await res.text();
+			} catch {}
+		}, { once: true });
     </script>
 </body>
 </html>
